@@ -21,6 +21,11 @@ public class UserService {
 
     @Transactional
     public AuthResponse registerUser(RegisterRequest request) {
+
+        if (request.getEmail() == null || request.getPassword() == null) {
+            throw new RuntimeException("Email and password cannot be empty!");
+        }
+
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new RuntimeException("Email address is already in use!");
         }
@@ -40,15 +45,16 @@ public class UserService {
         String token = "DUMMY_JWT_TOKEN_FOR_" + user.getEmail();
         return AuthResponse.builder()
                 .token(token)
+                .tokenType("Bearer")
                 .email(user.getEmail())
-                .role(user.getRole().name())
+                .role(user.getRole()!= null ? user.getRole().name() : "ROLE_CUSTOMER")
                 .build();
     }
 
-    @Transactional(readOnly = true)
-    public User getUserByEmail(String email) {
-        return userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found with email: " + email));
-    }
+//    @Transactional(readOnly = true)
+//    public User getUserByEmail(String email) {
+//        return userRepository.findByEmail(email)
+//                .orElseThrow(() -> new RuntimeException("User not found with email: " + email));
+//    }
 }
 
