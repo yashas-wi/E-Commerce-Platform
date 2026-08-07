@@ -41,7 +41,7 @@ public class User {
     @Column(nullable = false)
     private Role role;
 
-    private boolean isEnabled = true;
+    private boolean IsEnabled = true;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
@@ -57,5 +57,9 @@ public class User {
     public void addAddress(Address address) {
         addresses.add(address);
         address.setUser(this);
+    }
+
+    public Boolean getIsEnabled() {
+        return IsEnabled;
     }
 }

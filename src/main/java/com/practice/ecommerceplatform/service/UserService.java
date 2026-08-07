@@ -1,12 +1,13 @@
 package com.practice.ecommerceplatform.service;
 
 import com.practice.ecommerceplatform.dto.AuthResponse;
+import com.practice.ecommerceplatform.dto.LoginRequest;
 import com.practice.ecommerceplatform.dto.RegisterRequest;
 import com.practice.ecommerceplatform.entity.Role;
 import com.practice.ecommerceplatform.entity.User;
 import com.practice.ecommerceplatform.repository.UserRepository;
+import com.practice.ecommerceplatform.security.JwtUtils;
 import org.springframework.transaction.annotation.Transactional;
-import java.util.Optional;
 import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Service;
 public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwtUtils jwtUtils;
 
     @Transactional
     public AuthResponse registerUser(RegisterRequest request) {
@@ -36,7 +38,7 @@ public class UserService {
                 .password(passwordEncoder.encode(request.getPassword()))
                 .phoneNumber(request.getPhoneNumber())
                 .role(Role.ROLE_CUSTOMER)
-                .isEnabled(true)
+                .IsEnabled(true)
                 .build();
         userRepository.save(user);
 
@@ -51,10 +53,31 @@ public class UserService {
                 .build();
     }
 
-//    @Transactional(readOnly = true)
-//    public User getUserByEmail(String email) {
-//        return userRepository.findByEmail(email)
-//                .orElseThrow(() -> new RuntimeException("User not found with email: " + email));
-//    }
+    @Transactional(readOnly = true)
+    public AuthResponse loginUser(LoginRequest request) {
+
+        // 1. Find user by email
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new RuntimeException("Invalid email or password!"));
+
+        // 2. Verify password with BCrypt
+        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+            throw new RuntimeException("Invalid email or password!");
+        }
+
+        // 3. Check if user is enabled
+        if (!user.getIsEnabled()) {
+            throw new RuntimeException("User account is disabled!");
+        }
+
+        // 4. Generate real JWT Token
+        String token = jwtUtils.generateToken(user.getEmail(), user.getRole().name());
+        return AuthResponse.builder()
+                .token(token)
+                .tokenType("Bearer")
+                .email(user.getEmail())
+                .role(user.getRole().name())
+                .build();
+    }
 }
 
