@@ -7,11 +7,14 @@ import com.practice.ecommerceplatform.entity.Role;
 import com.practice.ecommerceplatform.entity.User;
 import com.practice.ecommerceplatform.repository.UserRepository;
 import com.practice.ecommerceplatform.security.JwtUtils;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+//import static jdk.internal.org.jline.reader.impl.LineReaderImpl.CompletionType.List;
 
 @Service
 @RequiredArgsConstructor
@@ -20,6 +23,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtils jwtUtils;
+
 
     @Transactional
     public AuthResponse registerUser(RegisterRequest request) {
@@ -78,6 +82,19 @@ public class UserService {
                 .email(user.getEmail())
                 .role(user.getRole().name())
                 .build();
+    }
+
+
+//    public User getUserByEmail(String currentEmail) {
+//        return userRepository.findByEmail(currentEmail)
+//                .orElseThrow(() -> new RuntimeException("Invalid email!"));
+//    }
+
+
+    @Transactional(readOnly = true)
+    public User getUserByEmail(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found with email: " + email));
     }
 }
 
