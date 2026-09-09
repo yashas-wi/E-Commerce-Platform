@@ -1,6 +1,5 @@
-package com.practice.orderservice.entity;
+package com.practice.paymentservice.entity;
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -8,40 +7,42 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
-@Table(name = "customer_orders")
+@Table(name = "payments")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Order {
+public class Payment {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(nullable = false)
-    private Long userId;
-
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference
-    @Builder.Default
-    private List<OrderItem> items = new ArrayList<>();
+    private Long orderId;
 
     @Column(nullable = false)
-    private BigDecimal totalAmount;
+    private Long userId;
+
+    @Column(nullable = false)
+    private BigDecimal amount;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private PaymentMode paymentMode;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     @Builder.Default
-    private OrderStatus status = OrderStatus.PENDING;
+    private PaymentStatus paymentStatus = PaymentStatus.PENDING;
 
-    @Column(nullable = true)
-    private Long shippingAddressId;
+    @Column(unique = true, nullable = false)
+    private String transactionId;
+
+    private String paymentGatewayReference;
 
     @CreationTimestamp
     @Column(updatable = false)
@@ -49,9 +50,4 @@ public class Order {
 
     @UpdateTimestamp
     private LocalDateTime updatedAt;
-
-    public void addOrderItem(OrderItem item) {
-        items.add(item);
-        item.setOrder(this);
-    }
 }

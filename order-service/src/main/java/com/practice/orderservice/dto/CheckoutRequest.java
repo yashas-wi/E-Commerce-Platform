@@ -9,6 +9,5 @@ public class CheckoutRequest {
     @NotNull(message = "User ID is required")
     private Long userId;
 
-    @NotNull(message = "Shipping Address ID is required")
     private Long shippingAddressId;
 }

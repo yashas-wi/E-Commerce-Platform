@@ -32,4 +32,11 @@ public class OrderController {
     public ResponseEntity<Order> getOrderById(@PathVariable Long orderId) {
         return ResponseEntity.ok(orderService.getOrderById(orderId));
     }
+
+    @PutMapping("/{orderId}/status")
+    public ResponseEntity<Order> updateOrderStatus(
+            @PathVariable Long orderId,
+            @RequestParam com.practice.orderservice.entity.OrderStatus status) {
+        return ResponseEntity.ok(orderService.updateOrderStatus(orderId, status));
+    }
 }
