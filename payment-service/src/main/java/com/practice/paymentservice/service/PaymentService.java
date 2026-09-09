@@ -17,7 +17,7 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-public class PaymentService {
+public class  PaymentService {
 
     private final PaymentRepository paymentRepository;
     private final OrderClient orderClient;

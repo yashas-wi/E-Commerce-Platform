@@ -1,6 +1,7 @@
 package com.practice.orderservice.service;
 
 import com.practice.orderservice.dto.CheckoutRequest;
+import com.practice.orderservice.dto.OrderResponseDto;
 import com.practice.orderservice.entity.Cart;
 import com.practice.orderservice.entity.Order;
 import com.practice.orderservice.entity.OrderItem;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -19,8 +21,20 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final CartService cartService;
 
+    private OrderResponseDto toDto(Order order) {
+        return OrderResponseDto.builder()
+                .id(order.getId())
+                .userId(order.getUserId())
+                .totalAmount(order.getTotalAmount())
+                .status(order.getStatus().name())
+                .shippingAddressId(order.getShippingAddressId())
+                .createdAt(order.getCreatedAt())
+                .updatedAt(order.getUpdatedAt())
+                .build();
+    }
+
     @Transactional
-    public Order checkout(CheckoutRequest request) {
+    public OrderResponseDto checkout(CheckoutRequest request) {
         Cart cart = cartService.getOrCreateCart(request.getUserId());
 
         if (cart.getItems() == null || cart.getItems().isEmpty()) {
@@ -53,24 +67,28 @@ public class OrderService {
         // 4. Clear Cart after successful checkout
         cartService.clearCart(request.getUserId());
 
-        return savedOrder;
+        return toDto(savedOrder);
     }
 
     @Transactional(readOnly = true)
-    public List<Order> getOrdersByUserId(Long userId) {
-        return orderRepository.findByUserId(userId);
+    public List<OrderResponseDto> getOrdersByUserId(Long userId) {
+        return orderRepository.findByUserId(userId).stream()
+                .map(this::toDto)
+                .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
-    public Order getOrderById(Long orderId) {
-        return orderRepository.findById(orderId)
+    public OrderResponseDto getOrderById(Long orderId) {
+        Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Order not found with ID: " + orderId));
+        return toDto(order);
     }
 
     @Transactional
-    public Order updateOrderStatus(Long orderId, OrderStatus status) {
-        Order order = getOrderById(orderId);
+    public OrderResponseDto updateOrderStatus(Long orderId, OrderStatus status) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Order not found with ID: " + orderId));
         order.setStatus(status);
-        return orderRepository.save(order);
+        return toDto(orderRepository.save(order));
     }
 }
