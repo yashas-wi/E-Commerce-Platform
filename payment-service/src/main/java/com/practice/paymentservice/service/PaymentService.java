@@ -24,7 +24,7 @@ public class  PaymentService {
 
     @Transactional
     public PaymentResponse processPayment(PaymentRequest request) {
-        // 1. Verify Order exists via Order Service (OpenFeign)
+
         OrderResponse order;
         try {
             order = orderClient.getOrderById(request.getOrderId());
@@ -37,17 +37,17 @@ public class  PaymentService {
             throw new RuntimeException("Order not found with ID: " + request.getOrderId());
         }
 
-        // 2. Validate Order Status
+
         if (!"PENDING".equalsIgnoreCase(order.getStatus())) {
             throw new RuntimeException("Payment cannot be processed. Order status is already: " + order.getStatus());
         }
 
-        // 3. Validate Payment Amount
+
         if (order.getTotalAmount().compareTo(request.getAmount()) != 0) {
             throw new RuntimeException("Payment amount (" + request.getAmount() + ") does not match order total (" + order.getTotalAmount() + ")!");
         }
 
-        // 4. Generate Unique Transaction ID
+
         String transactionId = "TXN-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
 
         // 5. Create and Save Payment Record
@@ -63,14 +63,13 @@ public class  PaymentService {
 
         Payment savedPayment = paymentRepository.save(payment);
 
-        // 6. Update Order Status in Order Service via OpenFeign
         try {
             orderClient.updateOrderStatus(request.getOrderId(), "PROCESSING");
         } catch (Exception e) {
             System.err.println("Warning: Failed to update order status: " + e.getMessage());
         }
 
-        // 7. Return clean response
+
         return PaymentResponse.builder()
                 .paymentId(savedPayment.getId())
                 .orderId(savedPayment.getOrderId())

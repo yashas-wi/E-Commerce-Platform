@@ -35,16 +35,15 @@ public class CartService {
 
     @Transactional
     public Cart addToCart(AddToCartRequest request) {
-        // 1. Call Product Service via OpenFeign to verify product exists and get fresh price
+
         ProductResponse product = productClient.getProductById(request.getProductId());
         if (product == null) {
             throw new RuntimeException("Product not found with ID: " + request.getProductId());
         }
 
-        // 2. Get or create Cart for user
         Cart cart = getOrCreateCart(request.getUserId());
 
-        // 3. Check if product already in cart
+
         Optional<CartItem> existingItemOpt = cart.getItems().stream()
                 .filter(item -> item.getProductId().equals(request.getProductId()))
                 .findFirst();
@@ -64,7 +63,7 @@ public class CartService {
             cart.addItem(newItem);
         }
 
-        // 4. Recalculate total price
+
         recalculateTotal(cart);
 
         return cartRepository.save(cart);

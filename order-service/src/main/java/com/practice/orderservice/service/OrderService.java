@@ -1,5 +1,6 @@
 package com.practice.orderservice.service;
 
+import com.practice.orderservice.client.InventoryClient;
 import com.practice.orderservice.dto.CheckoutRequest;
 import com.practice.orderservice.dto.OrderResponseDto;
 import com.practice.orderservice.entity.Cart;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -20,6 +22,7 @@ public class OrderService {
 
     private final OrderRepository orderRepository;
     private final CartService cartService;
+    private final InventoryClient inventoryClient;
 
     private OrderResponseDto toDto(Order order) {
         return OrderResponseDto.builder()
@@ -41,7 +44,7 @@ public class OrderService {
             throw new RuntimeException("Cannot checkout an empty cart!");
         }
 
-        // 1. Build Order from Cart
+
         Order order = Order.builder()
                 .userId(request.getUserId())
                 .shippingAddressId(request.getShippingAddressId())
@@ -49,7 +52,7 @@ public class OrderService {
                 .status(OrderStatus.PENDING)
                 .build();
 
-        // 2. Convert CartItems to OrderItems
+
         for (var cartItem : cart.getItems()) {
             OrderItem orderItem = OrderItem.builder()
                     .order(order)
@@ -61,10 +64,21 @@ public class OrderService {
             order.addOrderItem(orderItem);
         }
 
-        // 3. Save Order
+
         Order savedOrder = orderRepository.save(order);
 
-        // 4. Clear Cart after successful checkout
+        for (var cartItem : cart.getItems()) {
+            try {
+                inventoryClient.deductStock(Map.of(
+                        "productId", cartItem.getProductId(),
+                        "quantity", cartItem.getQuantity()
+                ));
+            } catch (Exception e) {
+                System.err.println("Warning: Could not deduct inventory for product "
+                        + cartItem.getProductId() + ": " + e.getMessage());
+            }
+        }
+
         cartService.clearCart(request.getUserId());
 
         return toDto(savedOrder);
