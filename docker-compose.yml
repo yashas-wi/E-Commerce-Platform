@@ -1,0 +1,190 @@
+version: '3.8'
+
+networks:
+  ecommerce-network:
+    driver: bridge
+
+services:
+  # ============================================================
+  # MySQL Database Service
+  # ============================================================
+  mysql:
+    image: mysql:8.0
+    container_name: ecommerce-mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-dsatm}
+      MYSQL_DATABASE: ${DB_NAME:-commerce_db}
+    ports:
+      - "3306:3306"
+    networks:
+      - ecommerce-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_PASSWORD:-dsatm}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ============================================================
+  # Service Registry (Eureka)
+  # ============================================================
+  eureka-server:
+    build:
+      context: ./eureka-server
+      dockerfile: Dockerfile
+    container_name: ecommerce-eureka-server
+    ports:
+      - "8761:8761"
+    networks:
+      - ecommerce-network
+
+  # ============================================================
+  # API Gateway
+  # ============================================================
+  api-gateway:
+    build:
+      context: ./api-gateway
+      dockerfile: Dockerfile
+    container_name: ecommerce-api-gateway
+    ports:
+      - "8080:8080"
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+    depends_on:
+      - eureka-server
+    networks:
+      - ecommerce-network
+
+  # ============================================================
+  # User Service
+  # ============================================================
+  user-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ecommerce-user-service
+    ports:
+      - "8081:8081"
+    environment:
+      - DB_URL=jdbc:mysql://mysql:3306/commerce_db
+      - DB_USERNAME=root
+      - DB_PASSWORD=${DB_PASSWORD:-dsatm}
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+    depends_on:
+      mysql:
+        condition: service_healthy
+      eureka-server:
+        condition: service_started
+    networks:
+      - ecommerce-network
+
+  # ============================================================
+  # Product Service
+  # ============================================================
+  product-service:
+    build:
+      context: ./product-service
+      dockerfile: Dockerfile
+    container_name: ecommerce-product-service
+    ports:
+      - "8082:8082"
+    environment:
+      - DB_URL=jdbc:mysql://mysql:3306/commerce_db
+      - DB_USERNAME=root
+      - DB_PASSWORD=${DB_PASSWORD:-dsatm}
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+    depends_on:
+      mysql:
+        condition: service_healthy
+      eureka-server:
+        condition: service_started
+    networks:
+      - ecommerce-network
+
+  # ============================================================
+  # Order Service
+  # ============================================================
+  order-service:
+    build:
+      context: ./order-service
+      dockerfile: Dockerfile
+    container_name: ecommerce-order-service
+    ports:
+      - "8083:8083"
+    environment:
+      - DB_URL=jdbc:mysql://mysql:3306/commerce_db
+      - DB_USERNAME=root
+      - DB_PASSWORD=${DB_PASSWORD:-dsatm}
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+    depends_on:
+      mysql:
+        condition: service_healthy
+      eureka-server:
+        condition: service_started
+    networks:
+      - ecommerce-network
+
+  # ============================================================
+  # Payment Service
+  # ============================================================
+  payment-service:
+    build:
+      context: ./payment-service
+      dockerfile: Dockerfile
+    container_name: ecommerce-payment-service
+    ports:
+      - "8084:8084"
+    environment:
+      - DB_URL=jdbc:mysql://mysql:3306/commerce_db
+      - DB_USERNAME=root
+      - DB_PASSWORD=${DB_PASSWORD:-dsatm}
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+    depends_on:
+      mysql:
+        condition: service_healthy
+      eureka-server:
+        condition: service_started
+    networks:
+      - ecommerce-network
+
+  # ============================================================
+  # Inventory Service
+  # ============================================================
+  inventory-service:
+    build:
+      context: ./inventory-service
+      dockerfile: Dockerfile
+    container_name: ecommerce-inventory-service
+    ports:
+      - "8085:8085"
+    environment:
+      - DB_URL=jdbc:mysql://mysql:3306/commerce_db
+      - DB_USERNAME=root
+      - DB_PASSWORD=${DB_PASSWORD:-dsatm}
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+    depends_on:
+      mysql:
+        condition: service_healthy
+      eureka-server:
+        condition: service_started
+    networks:
+      - ecommerce-network
+
+  # ============================================================
+  # Notification Service
+  # ============================================================
+  notification-service:
+    build:
+      context: ./notification-service
+      dockerfile: Dockerfile
+    container_name: ecommerce-notification-service
+    ports:
+      - "8086:8086"
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - MAIL_USERNAME=${MAIL_USERNAME:-noreply@ecommerce.com}
+      - MAIL_PASSWORD=${MAIL_PASSWORD:-}
+    depends_on:
+      - eureka-server
+    networks:
+      - ecommerce-network

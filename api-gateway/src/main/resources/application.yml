@@ -31,6 +31,16 @@ spring:
           predicates:
             - Path=/api/payments/**
 
+        - id: inventory-service
+          uri: lb://inventory-service
+          predicates:
+            - Path=/api/inventory/**
+
+        - id: notification-service
+          uri: lb://notification-service
+          predicates:
+            - Path=/api/notifications/**
+
 eureka:
   client:
     service-url:

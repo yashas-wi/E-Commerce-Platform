@@ -1,0 +1,75 @@
+[33mcommit f39df29ad58e338f02dc516db741168879cb0bdc[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mfeature/microservices-transition[m[33m)[m
+Author: Yashaswi <yashaswiraj050@gmail.com>
+Date:   Fri Sep 11 17:14:39 2026 +0530
+
+    Add Core Inventory Tracking Service
+
+[33mcommit 4947f3c77d6245b79548f98b1998a3a46367be7d[m[33m ([m[1;31morigin/feature/microservices-transition[m[33m)[m
+Author: Yashaswi <yashaswiraj050@gmail.com>
+Date:   Wed Sep 9 16:15:27 2026 +0530
+
+    Fix payment flow: add OrderResponseDto to avoid Feign lazy-load error and fix status enum conversion
+
+[33mcommit a91f9f5902d4e8db6260ecc3df11d4276b534936[m
+Author: Yashaswi <yashaswiraj050@gmail.com>
+Date:   Wed Sep 9 16:11:27 2026 +0530
+
+    Fix payment flow: add OrderResponseDto to avoid Feign lazy-load error and fix status enum conversion
+
+[33mcommit b8f2d611ae570356ece557cf7e41f79c32aff775[m
+Author: Yashaswi <yashaswiraj050@gmail.com>
+Date:   Sun Sep 6 16:23:29 2026 +0530
+
+    Transition architecture to Spring Cloud Microservices with API Gateway, Product Service, and Order Service
+
+[33mcommit db2f7689e67de017cc6c876eb19a6c94a8f81fe1[m[33m ([m[1;32mmain[m[33m)[m
+Author: Yashaswi <yashaswiraj050@gmail.com>
+Date:   Tue Sep 1 14:54:44 2026 +0530
+
+    Add a new feature order management system (like order creation or status update)
+
+[33mcommit 4574c50fbffbd5ac7294a7fe3adccf35edaae04e[m
+Author: Yashaswi <yashaswiraj050@gmail.com>
+Date:   Sun Aug 30 23:00:43 2026 +0530
+
+    Add cart and CartItem entities and repositories
+
+[33mcommit 75ed2eb406c137687accb139685225ef7be15661[m
+Author: Yashaswi <yashaswiraj050@gmail.com>
+Date:   Wed Aug 26 15:10:59 2026 +0530
+
+    Add Eureka Server and implement Product and Category management APIs
+
+[33mcommit 44195cfffc79b3191355c5d8b466e03bc0fcc826[m
+Author: Yashaswi <yashaswiraj050@gmail.com>
+Date:   Mon Aug 17 21:52:04 2026 +0530
+
+    text
+    
+    feat(security): implement JWT authentication filter and protected user profile endpoint
+
+[33mcommit eeff26eb5875bd6f46cb7815a57b21fa03cd7377[m
+Author: Yashaswi <yashaswiraj050@gmail.com>
+Date:   Fri Aug 7 13:58:17 2026 +0530
+
+    feat(auth): implement user registration, login and JWT authentication
+
+[33mcommit deb77bf08b0392c4cbe93a275ee833467553ae81[m
+Author: Yashaswi <yashaswiraj050@gmail.com>
+Date:   Tue Aug 4 18:01:25 2026 +0530
+
+    Updated UserService and Added Security Config
+
+[33mcommit c7571671c990a439ac66a790ef6a1d21060d50d9[m
+Author: Yashaswi <yashaswiraj050@gmail.com>
+Date:   Fri Jul 31 19:44:22 2026 +0530
+
+    Add README for E-Commerce Platform Backend
+    
+    Added a comprehensive README file detailing the E-Commerce Platform backend, including features, tech stack, and setup instructions.
+
+[33mcommit 766d493eddae3504cf54c882066c69cd310c82ad[m
+Author: Yashaswi <yashaswiraj050@gmail.com>
+Date:   Fri Jul 31 19:42:12 2026 +0530
+
+    Initial Commit
