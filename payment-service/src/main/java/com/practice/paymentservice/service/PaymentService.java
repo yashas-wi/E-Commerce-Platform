@@ -12,15 +12,18 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import com.practice.paymentservice.client.NotificationClient;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-public class  PaymentService {
+public class PaymentService {
 
     private final PaymentRepository paymentRepository;
     private final OrderClient orderClient;
+    private final NotificationClient notificationClient;
 
     @Transactional
     public PaymentResponse processPayment(PaymentRequest request) {
@@ -67,6 +70,20 @@ public class  PaymentService {
             orderClient.updateOrderStatus(request.getOrderId(), "PROCESSING");
         } catch (Exception e) {
             System.err.println("Warning: Failed to update order status: " + e.getMessage());
+        }
+
+        // 7. Dispatch Payment Notification via notification-service
+        try {
+            notificationClient.sendPaymentSuccessNotification(Map.of(
+                    "toEmail", "customer" + request.getUserId() + "@example.com",
+                    "orderId", savedPayment.getOrderId(),
+                    "amount", savedPayment.getAmount(),
+                    "paymentMode", savedPayment.getPaymentMode(),
+                    "transactionId", savedPayment.getTransactionId(),
+                    "userId", savedPayment.getUserId()
+            ));
+        } catch (Exception e) {
+            System.err.println("Warning: Failed to dispatch payment notification: " + e.getMessage());
         }
 
 
