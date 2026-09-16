@@ -17,17 +17,28 @@ public class JwtUtil {
 
     public boolean validateToken(String token) {
         try {
+            if (token == null) return false;
+            token = token.trim();
+            if (token.startsWith("\"") && token.endsWith("\"")) {
+                token = token.substring(1, token.length() - 1);
+            }
             Jwts.parser()
                     .verifyWith(key)
                     .build()
                     .parseSignedClaims(token);
             return true;
         } catch (Exception e) {
+            System.err.println("JWT Validation Error: " + e.getMessage());
             return false;
         }
     }
 
     public Claims getClaims(String token) {
+        if (token == null) return null;
+        token = token.trim();
+        if (token.startsWith("\"") && token.endsWith("\"")) {
+            token = token.substring(1, token.length() - 1);
+        }
         return Jwts.parser()
                 .verifyWith(key)
                 .build()

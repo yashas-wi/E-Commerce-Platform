@@ -40,8 +40,8 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
         String path = request.getURI().getPath();
         HttpMethod method = request.getMethod();
 
-        // 1. Root or health endpoints
-        if (path.equals("/") || path.isEmpty()) {
+        // 1. Root, health, or CORS preflight OPTIONS requests
+        if (path.equals("/") || path.isEmpty() || HttpMethod.OPTIONS.equals(method)) {
             return chain.filter(exchange);
         }
 
@@ -67,7 +67,10 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
             return onError(exchange, "Authorization token must start with Bearer", HttpStatus.UNAUTHORIZED);
         }
 
-        String token = authHeader.substring(7);
+        String token = authHeader.substring(7).trim();
+        if (token.startsWith("\"") && token.endsWith("\"")) {
+            token = token.substring(1, token.length() - 1);
+        }
         if (!jwtUtil.validateToken(token)) {
             return onError(exchange, "Invalid or expired JWT token", HttpStatus.UNAUTHORIZED);
         }

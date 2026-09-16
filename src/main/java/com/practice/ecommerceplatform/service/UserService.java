@@ -47,13 +47,13 @@ public class UserService {
         userRepository.save(user);
 
 
-        // JWT Generation will go here in Security phase
-        String token = "DUMMY_JWT_TOKEN_FOR_" + user.getEmail();
+        // 5. Generate real JWT Token
+        String token = jwtUtils.generateToken(user.getEmail(), user.getRole().name());
         return AuthResponse.builder()
                 .token(token)
                 .tokenType("Bearer")
                 .email(user.getEmail())
-                .role(user.getRole()!= null ? user.getRole().name() : "ROLE_CUSTOMER")
+                .role(user.getRole() != null ? user.getRole().name() : "ROLE_CUSTOMER")
                 .build();
     }
 
@@ -95,6 +95,45 @@ public class UserService {
     public User getUserByEmail(String email) {
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found with email: " + email));
+    }
+
+    @Transactional
+    public String forgotPassword(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("No account found with email: " + email));
+
+        String code = String.format("%06d", new java.util.Random().nextInt(999999));
+        user.setResetToken(code);
+        user.setResetTokenExpiry(java.time.LocalDateTime.now().plusMinutes(15));
+        userRepository.save(user);
+
+        System.out.println("=================================================");
+        System.out.println("🔐 PASSWORD RESET CODE FOR " + email + ": " + code);
+        System.out.println("Valid for 15 minutes");
+        System.out.println("=================================================");
+
+        return code;
+    }
+
+    @Transactional
+    public boolean resetPassword(String email, String code, String newPassword) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("No account found with email: " + email));
+
+        if (user.getResetToken() == null || !user.getResetToken().equals(code)) {
+            throw new RuntimeException("Invalid password reset code!");
+        }
+
+        if (user.getResetTokenExpiry() == null || user.getResetTokenExpiry().isBefore(java.time.LocalDateTime.now())) {
+            throw new RuntimeException("Password reset code has expired! Please request a new one.");
+        }
+
+        user.setPassword(passwordEncoder.encode(newPassword));
+        user.setResetToken(null);
+        user.setResetTokenExpiry(null);
+        userRepository.save(user);
+
+        return true;
     }
 }
 
