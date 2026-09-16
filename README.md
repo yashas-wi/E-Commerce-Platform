@@ -184,3 +184,21 @@ docker compose down
    7. `InventoryServiceApplication` (Port 8085)
    8. `NotificationServiceApplication` (Port 8086)
 3. Open Eureka dashboard at: `http://localhost:8761` to verify all 7 services registered.
+
+---
+
+## ?? Running the Frontend (React + Vite)
+
+The frontend Single Page Application is located in `frontend/`.
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+Open your browser at: **`http://localhost:5173`**
+- **Catalog Browsing:** Browse products with real-time stock levels fetched from `inventory-service`.
+- **User Authentication:** Sign in or register; receives and stores JWT token automatically.
+- **Cart & Checkout:** Add products, slide out cart drawer, proceed to checkout (auto-deducts stock via `order-service`).
+- **Payment:** Select payment method (UPI, Card, NetBanking), execute payment via `payment-service`, and view the transaction receipt!

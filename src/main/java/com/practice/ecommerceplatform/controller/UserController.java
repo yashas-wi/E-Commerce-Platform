@@ -42,4 +42,33 @@ public class UserController {
         User user = userService.getUserByEmail(currentEmail);
         return ResponseEntity.ok(user);
     }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<?> forgotPassword(@RequestBody java.util.Map<String, String> request) {
+        String email = request.get("email");
+        if (email == null || email.isBlank()) {
+            return ResponseEntity.badRequest().body(java.util.Map.of("error", "Email is required"));
+        }
+        String resetCode = userService.forgotPassword(email);
+        return ResponseEntity.ok(java.util.Map.of(
+                "message", "Password reset code generated and dispatched successfully.",
+                "resetCode", resetCode
+        ));
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<?> resetPassword(@RequestBody java.util.Map<String, String> request) {
+        String email = request.get("email");
+        String code = request.get("code");
+        String newPassword = request.get("newPassword");
+
+        if (email == null || code == null || newPassword == null) {
+            return ResponseEntity.badRequest().body(java.util.Map.of("error", "Email, reset code, and new password are required"));
+        }
+
+        userService.resetPassword(email, code, newPassword);
+        return ResponseEntity.ok(java.util.Map.of(
+                "message", "Password has been successfully reset! You can now log in with your new password."
+        ));
+    }
 }

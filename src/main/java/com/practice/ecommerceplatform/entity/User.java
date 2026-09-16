@@ -44,6 +44,10 @@ public class User {
 
     private boolean IsEnabled = true;
 
+    private String resetToken;
+
+    private LocalDateTime resetTokenExpiry;
+
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     @JsonIgnore
